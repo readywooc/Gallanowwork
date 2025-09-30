@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import FadeInUp from '../components/FadeInUp';
 import MouseTrail from '../components/MouseTrail';
+import MouseGlow from '../components/MouseGlow';
 import VideoSection from '../components/VideoSection';
 import FloatingCard from '../components/FloatingCard';
 import { Link } from 'react-router-dom';
@@ -31,6 +32,7 @@ const Home: React.FC = () => {
   return (
     <div className="relative text-[#ECE8E3] bg-[#08070A] overflow-x-hidden">
       <MouseTrail />
+      <MouseGlow />
       
       {/* Hero Section */}
       <section className="relative pt-8 pb-20 px-6 min-h-screen flex items-center">
