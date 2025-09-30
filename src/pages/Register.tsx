@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -10,13 +10,16 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  CheckCircle
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import FadeInUp from '../components/FadeInUp';
 import MouseTrail from '../components/MouseTrail';
 import MouseGlow from '../components/MouseGlow';
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -25,6 +28,7 @@ const Register: React.FC = () => {
   const [userType, setUserType] = useState<'manufacturer' | 'retailer' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const [formData, setFormData] = useState({
     // Basic Info
@@ -50,6 +54,82 @@ const Register: React.FC = () => {
     agreeToPrivacy: false
   });
 
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (step === 1) {
+      if (!userType) {
+        newErrors.userType = 'Please select your business type';
+      }
+    }
+    
+    if (step === 2) {
+      if (!formData.email) {
+        newErrors.email = 'Email is required';
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = 'Please enter a valid email address';
+      }
+      
+      if (!formData.phone) {
+        newErrors.phone = 'Phone number is required';
+      } else if (!/^\+91[6-9]\d{9}$/.test(formData.phone)) {
+        newErrors.phone = 'Please enter a valid Indian phone number (+91XXXXXXXXXX)';
+      }
+      
+      if (!formData.password) {
+        newErrors.password = 'Password is required';
+      } else if (formData.password.length < 8) {
+        newErrors.password = 'Password must be at least 8 characters long';
+      }
+      
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = 'Please confirm your password';
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
+    
+    if (step === 3) {
+      if (!formData.businessName) {
+        newErrors.businessName = 'Business name is required';
+      }
+      
+      if (!formData.contactPerson) {
+        newErrors.contactPerson = 'Contact person is required';
+      }
+      
+      if (!formData.gstNumber) {
+        newErrors.gstNumber = 'GST number is required';
+      } else if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(formData.gstNumber)) {
+        newErrors.gstNumber = 'Please enter a valid GST number';
+      }
+      
+      if (userType === 'manufacturer' && !formData.annualRevenue) {
+        newErrors.annualRevenue = 'Annual revenue is required';
+      }
+      
+      if (userType === 'retailer') {
+        if (!formData.businessType) {
+          newErrors.businessType = 'Business type is required';
+        }
+        if (!formData.storeLocations) {
+          newErrors.storeLocations = 'Number of store locations is required';
+        }
+      }
+    }
+    
+    if (step === 4) {
+      if (!formData.agreeToTerms) {
+        newErrors.agreeToTerms = 'You must agree to the Terms of Service';
+      }
+      if (!formData.agreeToPrivacy) {
+        newErrors.agreeToPrivacy = 'You must agree to the Privacy Policy';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -58,10 +138,15 @@ const Register: React.FC = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (validateStep(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -74,8 +159,10 @@ const Register: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Registration data:', { userType, ...formData });
+    if (validateStep(4)) {
+      // Handle registration logic here
+      console.log('Registration data:', { userType, ...formData });
+    }
   };
 
   const steps = [
@@ -92,11 +179,19 @@ const Register: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Logo */}
         <FadeInUp className="text-center mb-8">
-          <img 
-            src="https://i.ibb.co/LzTVQ9cj/Gallalogo.png" 
-            alt="Gallaa Logo" 
-            className="h-16 w-auto mx-auto mb-4"
-          />
+          <button 
+            onClick={() => navigate('/')}
+            className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity mb-4"
+          >
+            <img 
+              src="https://i.ibb.co/LzTVQ9cj/Gallalogo.png" 
+              alt="Gallaa Logo" 
+              className="h-16 w-auto"
+            />
+            <span className="text-2xl font-['Playfair_Display'] font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFD777] bg-clip-text text-transparent">
+              Gallaa
+            </span>
+          </button>
         </FadeInUp>
 
         <FadeInUp>
@@ -153,6 +248,13 @@ const Register: React.FC = () => {
                     <h3 className="text-2xl font-semibold mb-4">What type of business are you?</h3>
                     <p className="text-[#ECE8E3]/70">Choose the option that best describes your business</p>
                   </div>
+                  
+                  {errors.userType && (
+                    <div className="flex items-center text-red-400 text-sm mb-4">
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      {errors.userType}
+                    </div>
+                  )}
                   
                   <div className="grid md:grid-cols-2 gap-6">
                     <button
@@ -218,6 +320,12 @@ const Register: React.FC = () => {
                           placeholder="Enter your email"
                         />
                       </div>
+                      {errors.email && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.email}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -234,6 +342,12 @@ const Register: React.FC = () => {
                           placeholder="+91 98765 43210"
                         />
                       </div>
+                      {errors.phone && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.phone}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -257,6 +371,12 @@ const Register: React.FC = () => {
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      {errors.password && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.password}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -280,6 +400,12 @@ const Register: React.FC = () => {
                           {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      {errors.confirmPassword && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.confirmPassword}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -302,6 +428,12 @@ const Register: React.FC = () => {
                         className="w-full px-4 py-3 bg-[#ECE8E3]/10 border border-[#ECE8E3]/20 rounded-lg focus:border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 text-[#ECE8E3] placeholder-[#ECE8E3]/50 transition-all duration-200"
                         placeholder={userType === 'manufacturer' ? 'Your company name' : 'Your business name'}
                       />
+                      {errors.businessName && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.businessName}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -315,6 +447,12 @@ const Register: React.FC = () => {
                         className="w-full px-4 py-3 bg-[#ECE8E3]/10 border border-[#ECE8E3]/20 rounded-lg focus:border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 text-[#ECE8E3] placeholder-[#ECE8E3]/50 transition-all duration-200"
                         placeholder="Primary contact person"
                       />
+                      {errors.contactPerson && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.contactPerson}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -328,6 +466,12 @@ const Register: React.FC = () => {
                         className="w-full px-4 py-3 bg-[#ECE8E3]/10 border border-[#ECE8E3]/20 rounded-lg focus:border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 text-[#ECE8E3] placeholder-[#ECE8E3]/50 transition-all duration-200"
                         placeholder="22AAAAA0000A1Z5"
                       />
+                      {errors.gstNumber && (
+                        <div className="flex items-center text-red-400 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.gstNumber}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -358,6 +502,12 @@ const Register: React.FC = () => {
                           <option value="5Cr-10Cr" style={{ backgroundColor: '#08070A', color: '#ECE8E3' }}>₹5Cr - ₹10Cr</option>
                           <option value="10Cr+" style={{ backgroundColor: '#08070A', color: '#ECE8E3' }}>₹10Cr+</option>
                         </select>
+                        {errors.annualRevenue && (
+                          <div className="flex items-center text-red-400 text-sm mt-1">
+                            <AlertCircle className="w-4 h-4 mr-1" />
+                            {errors.annualRevenue}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -378,6 +528,12 @@ const Register: React.FC = () => {
                             <option value="online" style={{ backgroundColor: '#08070A', color: '#ECE8E3' }}>Online Store</option>
                             <option value="hybrid" style={{ backgroundColor: '#08070A', color: '#ECE8E3' }}>Hybrid</option>
                           </select>
+                          {errors.businessType && (
+                            <div className="flex items-center text-red-400 text-sm mt-1">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              {errors.businessType}
+                            </div>
+                          )}
                         </div>
 
                         <div>
@@ -392,6 +548,12 @@ const Register: React.FC = () => {
                             placeholder="1"
                             min="1"
                           />
+                          {errors.storeLocations && (
+                            <div className="flex items-center text-red-400 text-sm mt-1">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              {errors.storeLocations}
+                            </div>
+                          )}
                         </div>
                       </>
                     )}
@@ -446,6 +608,12 @@ const Register: React.FC = () => {
                         </Link>
                       </span>
                     </label>
+                    {errors.agreeToTerms && (
+                      <div className="flex items-center text-red-400 text-sm">
+                        <AlertCircle className="w-4 h-4 mr-1" />
+                        {errors.agreeToTerms}
+                      </div>
+                    )}
 
                     <label className="flex items-start">
                       <input
@@ -463,6 +631,12 @@ const Register: React.FC = () => {
                         </Link>
                       </span>
                     </label>
+                    {errors.agreeToPrivacy && (
+                      <div className="flex items-center text-red-400 text-sm">
+                        <AlertCircle className="w-4 h-4 mr-1" />
+                        {errors.agreeToPrivacy}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -484,7 +658,6 @@ const Register: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleNext}
-                      disabled={currentStep === 1 && !userType}
                       className="reward-button px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#FFD777] text-[#08070A] font-semibold rounded-lg hover:shadow-lg hover:shadow-[#D4AF37]/25 hover:-translate-y-1 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 flex items-center transform"
                     >
                       Next
@@ -493,7 +666,6 @@ const Register: React.FC = () => {
                   ) : (
                     <button
                       type="submit"
-                      disabled={!formData.agreeToTerms || !formData.agreeToPrivacy}
                       className="reward-button px-6 py-3 bg-gradient-to-r from-[#D4AF37] to-[#FFD777] text-[#08070A] font-semibold rounded-lg hover:shadow-lg hover:shadow-[#D4AF37]/25 hover:-translate-y-1 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:scale-100 flex items-center transform"
                     >
                       Create Account

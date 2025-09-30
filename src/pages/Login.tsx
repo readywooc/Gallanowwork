@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Award } from 'lucide-react';
 import FadeInUp from '../components/FadeInUp';
 import MouseTrail from '../components/MouseTrail';
 import MouseGlow from '../components/MouseGlow';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -33,8 +34,15 @@ const Login: React.FC = () => {
       {/* Left Side Branding Panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#D4AF37]/20 to-[#FFD777]/10 items-center justify-center p-12 relative">
         <div className="max-w-md text-center">
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#D4AF37] to-[#FFD777] rounded-2xl flex items-center justify-center shadow-xl shadow-[#D4AF37]/30 mb-8">
-            <Award className="w-10 h-10 text-[#08070A]" />
+          <div className="mb-8">
+            <img 
+              src="https://i.ibb.co/LzTVQ9cj/Gallalogo.png" 
+              alt="Gallaa Logo" 
+              className="h-20 w-auto mx-auto mb-4"
+            />
+            <span className="text-2xl font-['Playfair_Display'] font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFD777] bg-clip-text text-transparent">
+              Gallaa
+            </span>
           </div>
           <h2 className="text-4xl font-['Playfair_Display'] font-bold mb-4 leading-tight">
             India’s Premier <span className="text-[#D4AF37]">Luxury B2B</span> Platform
@@ -50,6 +58,23 @@ const Login: React.FC = () => {
         <div className="w-full max-w-md">
           <FadeInUp>
             <div className="text-center mb-10">
+              {/* Mobile Logo */}
+              <div className="lg:hidden mb-8">
+                <button 
+                  onClick={() => navigate('/')}
+                  className="inline-flex items-center space-x-3 hover:opacity-80 transition-opacity"
+                >
+                  <img 
+                    src="https://i.ibb.co/LzTVQ9cj/Gallalogo.png" 
+                    alt="Gallaa Logo" 
+                    className="h-12 w-auto"
+                  />
+                  <span className="text-xl font-['Playfair_Display'] font-bold bg-gradient-to-r from-[#D4AF37] to-[#FFD777] bg-clip-text text-transparent">
+                    Gallaa
+                  </span>
+                </button>
+              </div>
+              
               <h1 className="text-3xl md:text-4xl font-['Playfair_Display'] font-bold mb-3">
                 Welcome Back
               </h1>
@@ -142,11 +167,9 @@ const Login: React.FC = () => {
                 <div className="text-center text-sm text-[#ECE8E3]/50 mb-4">Or continue with</div>
                 <div className="flex gap-4">
                   <button className="flex-1 flex items-center justify-center py-2 rounded-lg bg-[#ECE8E3]/10 border border-[#ECE8E3]/20 hover:border-[#D4AF37]/50 hover:bg-[#ECE8E3]/15 transition-all duration-300 hover:-translate-y-0.5 hover:scale-105">
-                    <img
-                      src="https://developers.google.com/identity/images/g-logo.png"
-                      alt="Google"
-                      className="w-5 h-5 mr-2"
-                    />
+                    <div className="w-5 h-5 bg-white rounded mr-2 flex items-center justify-center">
+                      <span className="text-xs font-bold text-red-500">G</span>
+                    </div>
                     <span className="text-sm">Google</span>
                   </button>
                   <button className="flex-1 flex items-center justify-center py-2 rounded-lg bg-[#ECE8E3]/10 border border-[#ECE8E3]/20 hover:border-[#D4AF37]/50 hover:bg-[#ECE8E3]/15 transition-all duration-300 hover:-translate-y-0.5 hover:scale-105">

@@ -33,6 +33,7 @@ const Home: React.FC = () => {
     <div className="relative text-[#ECE8E3] bg-[#08070A] overflow-x-hidden">
       <MouseTrail />
       <MouseGlow />
+      <MouseGlow />
       
       {/* Hero Section */}
       <section className="relative pt-8 pb-20 px-6 min-h-screen flex items-center">
@@ -144,7 +145,7 @@ const Home: React.FC = () => {
             </p>
           </FadeInUp>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch">
             <FadeInUp delay={100}>
               <FloatingCard
                 title="Smart Pricing"
@@ -203,7 +204,8 @@ const Home: React.FC = () => {
                   "Founded by industry experts",
                   "Backed by leading VCs",
                   "ISO certified platform",
-                  "Trusted by thousands"
+                  "Trusted by thousands",
+                  "Award-winning team"
                 ]}
                 delay={600}
               />
